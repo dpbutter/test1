@@ -1,0 +1,12 @@
+\cdbalgorithm{keep\_terms}{\it terms=[{\sf list of term numbers}]}
+
+Keep the terms indicated by the list, dropping all others.
+\begin{screen}{1,2,3}
+ex:= A + B + C + D + E + F;
+keep_terms(_, [2,4])
+C + E
+\end{screen}
+Note that counting starts from zero.
+
+\cdbseealgo{keep_weight}
+\cdbseealgo{take_match}

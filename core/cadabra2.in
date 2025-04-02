@@ -1,0 +1,149 @@
+#!${Python_EXECUTABLE}
+#
+# \ingroup pythoncore
+#
+# \file 
+# Command line interpreter for Cadabra, written in Python.
+#
+#     cadabra2 [-d] [filename]
+#
+# Running with the '-d' flag runs cadabra under gdb, so that
+# one can generate back traces etc.
+
+import sys
+import site
+from code import InteractiveConsole
+import code
+import re
+import readline
+import rlcompleter
+import os
+
+# Make sure we can find the cadabra2 python module; is always
+# installed in PYTHON_SITE_PATH
+install_prefix=os.path.realpath(sys.argv[0])
+install_prefix=install_prefix.replace(os.sep+'bin'+os.sep+'cadabra2', os.sep+'${PYTHON_SITE_PATH}')
+# print("Module path ", install_prefix)
+sys.path.append(install_prefix)
+
+from cadabra2 import *
+
+class FileCacher:
+    "Cache the stdout text so we can analyze it before returning it"
+    def __init__(self): self.reset()
+    def reset(self): self.out = []
+    def write(self,line): self.out.append(line)
+    def flush(self):
+#        output = '\n'.join(self.out)
+        output=self.out
+        self.reset()
+        return output
+
+def findDefaults():
+    for d in sys.path:
+        filepath = os.path.join(d, "cadabra2_defaults.py")
+        if os.path.isfile(filepath):
+            return filepath
+    return None
+    
+class Shell(InteractiveConsole):
+    "Wrapper around Python that can filter input/output to the shell"
+    def __init__(self):
+        self.stdout = sys.stdout
+        self.cache = FileCacher()
+        # Variables to keep track of multi-line parsing info.
+        self.convert_data = ConvertData()
+        InteractiveConsole.__init__(self)
+        return
+
+    # If the object to be displayed is an Ex (add Property), print it
+    # using the human-readable str (FIXME: add other printers). If not,
+    # pass it on to the previously existing display hook.
+    def _displayhook(self, arg):
+        if isinstance(arg, Ex):
+            pass
+            #print(str(arg))
+        elif isinstance(arg, Property):
+            pass
+            #print(str(arg))
+        else:
+            self.remember_display_hook(arg)
+
+            
+    # Setup hooks for pretty printing.
+    def set_display(self):
+        self.remember_display_hook = sys.displayhook
+        sys.displayhook = self._displayhook
+
+    def unset_display(self):
+        sys.displayhook = self.remember_display_hook
+
+
+    def get_output(self): sys.stdout = self.cache
+    def return_output(self): sys.stdout = self.stdout
+
+    def push(self, line):
+
+        # line = self.preprocess(line, True)
+        prefix, line = convert_line(line, self.convert_data, True)
+        if self.convert_data.lhs == "":
+            # print('executing: ')
+            # print(line) # line is generically multiple lines
+
+            # Now feed the pre-parsed input to Python.
+            self.get_output()
+            sys.ps1='> '
+            ret=""
+            line+="\n" # InteractiveConsole needs a terminating newline
+            for single in line.splitlines():
+               ret=InteractiveConsole.push(self, single)
+            self.return_output()
+            output = self.cache.flush()
+            for line in output:
+                sys.stdout.write(line)
+
+            return ret
+        else:
+            # Preprocessing has detected an unfinished Cadabra line;
+            # switch the prompt to indicate Cadabra continuation, and
+            # do not feed the line to Python yet.
+            sys.ps1='| '
+            return ""
+
+if __name__ == '__main__':
+    sh = Shell()
+    sys.ps1='> '
+    sys.ps2='. '
+    readline.set_completer(rlcompleter.Completer(locals()).complete)
+    readline.parse_and_bind("tab: complete")
+
+    if len(sys.argv)>1:
+        if '-d' in sys.argv:
+            #rs = "lldb -ex r --args ${Python_EXECUTABLE} "+sys.argv[0];
+            rs = "gdb -q -ex r --args ${Python_EXECUTABLE} "+sys.argv[0];
+            for a in sys.argv[1:]:
+                if a!='-d':
+                    rs += " "+a
+            #print('executing '+rs)
+            os.system(rs)
+        else:
+            with open(findDefaults()) as f:
+                code = compile(f.read(), "cadabra2_defaults.py", 'exec')
+                exec(code)
+
+            sh2 = InteractiveConsole()
+            with open(sys.argv[1]) as f:
+                collect=""
+                for line in f:
+                    line=line.rstrip()
+                    prefix, res = convert_line(line, sh.convert_data, True)
+                    if res!="::empty":
+                       collect += res+"\n"		    
+                # print("----\n"+collect+"----\n")
+                cmp = compile(collect, sys.argv[1], 'exec')
+                exec(cmp)
+                # would be nice to be able to continue from here on the command line, but that requires
+                # pulling in the right locals/globals
+    else:
+        sh.runsource("import os; import sys; install_prefix=os.path.realpath(sys.argv[0]); install_prefix=install_prefix.replace('/bin/cadabra2','${CMAKE_INSTALL_PREFIX}/${PYTHON_SITE_PATH}'); sys.path.append(install_prefix); print('Cadabra @CADABRA_VERSION_SEM@ (build @CADABRA_VERSION_BUILD@ dated @CADABRA_VERSION_DATE@)'); print ('Copyright (C) @COPYRIGHT_YEARS@  Kasper Peeters <info@cadabra.science>'); f=open('${CMAKE_INSTALL_PREFIX}/${PYTHON_SITE_PATH}/cadabra2_defaults.py'); code=compile(f.read(), 'cadabra2_defaults.py', 'exec'); exec(code); f.close(); print('Using SymPy version '+sympy.__version__);")
+        sh.interact(banner='Info at https://cadabra.science/\nAvailable under the terms of the GNU General Public License v3\n')

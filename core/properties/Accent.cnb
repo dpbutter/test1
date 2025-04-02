@@ -1,0 +1,80 @@
+{
+	"cells" : 
+	[
+		{
+			"cell_origin" : "client",
+			"cell_type" : "latex",
+			"cells" : 
+			[
+				{
+					"cell_origin" : "client",
+					"cell_type" : "latex_view",
+					"source" : "\\property{Accent}{Turn a symbol into an accent.}\n\nTurns a symbol into an accent. Accented objects inherit all properties\nand indices from the objects which they wrap. Here is an example with\ninherited coordinate dependence,"
+				}
+			],
+			"hidden" : true,
+			"source" : "\\property{Accent}{Turn a symbol into an accent.}\n\nTurns a symbol into an accent. Accented objects inherit all properties\nand indices from the objects which they wrap. Here is an example with\ninherited coordinate dependence,"
+		},
+		{
+			"cell_origin" : "client",
+			"cell_type" : "input",
+			"cells" : 
+			[
+				{
+					"cell_origin" : "server",
+					"cell_type" : "latex_view",
+					"source" : "\\begin{dmath*}{}\\text{Attached property Accent to~}\\widehat{\\#}.\\end{dmath*}"
+				},
+				{
+					"cell_origin" : "server",
+					"cell_type" : "latex_view",
+					"source" : "\\begin{dmath*}{}\\text{Attached property PartialDerivative to~}\\partial{\\#}.\\end{dmath*}"
+				},
+				{
+					"cell_origin" : "server",
+					"cell_type" : "latex_view",
+					"source" : "\\begin{dmath*}{}\\text{Attached property Depends to~}A.\\end{dmath*}"
+				},
+				{
+					"cell_origin" : "server",
+					"cell_type" : "latex_view",
+					"source" : "\\begin{dmath*}{}\\partial\\left(A \\widehat{A} B\\right)\\end{dmath*}"
+				}
+			],
+			"source" : "\\hat{#}::Accent;\n\\partial{#}::PartialDerivative;\nA::Depends(\\partial{#}, \\hat{#});\nex:=\\partial(A \\hat{A} B);"
+		},
+		{
+			"cell_origin" : "client",
+			"cell_type" : "input",
+			"cells" : 
+			[
+				{
+					"cell_origin" : "server",
+					"cell_type" : "latex_view",
+					"source" : "\\begin{dmath*}{}\\partial{A} \\widehat{A} B+A \\partial\\left(\\widehat{A}\\right) B+A \\widehat{A} \\partial{B}\\end{dmath*}"
+				}
+			],
+			"source" : "product_rule(_);"
+		},
+		{
+			"cell_origin" : "client",
+			"cell_type" : "input",
+			"cells" : 
+			[
+				{
+					"cell_origin" : "server",
+					"cell_type" : "latex_view",
+					"source" : "\\begin{dmath*}{}\\partial{A} \\widehat{A} B+A \\partial\\left(\\widehat{A}\\right) B+A \\widehat{A} \\partial{B}\\end{dmath*}"
+				}
+			],
+			"source" : "unwrap(_, $\\partial{#}$);"
+		},
+		{
+			"cell_origin" : "client",
+			"cell_type" : "input",
+			"source" : ""
+		}
+	],
+	"description" : "Cadabra JSON notebook format",
+	"version" : 1
+}

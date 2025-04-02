@@ -1,0 +1,25 @@
+
+#pragma once
+
+/// This file contains settings which are imported from the CMake
+/// configuration (installation path and version numbers)
+
+#define CADABRA_VERSION_MAJOR "@CADABRA_VERSION_MAJOR@"
+#define CADABRA_VERSION_MINOR "@CADABRA_VERSION_MINOR@"
+#define CADABRA_VERSION_PATCH "@CADABRA_VERSION_PATCH@"
+#define CADABRA_VERSION_FULL  "@CADABRA_VERSION_MAJOR@.@CADABRA_VERSION_MINOR@.@CADABRA_VERSION_PATCH@"
+#define CADABRA_VERSION_SEM   "@CADABRA_VERSION_SEM@"
+#define CADABRA_VERSION_DATE  "@CADABRA_VERSION_DATE@"
+#define CADABRA_VERSION_BUILD "@CADABRA_VERSION_BUILD@"
+#define COPYRIGHT_YEARS       "@COPYRIGHT_YEARS@"
+
+#cmakedefine CONDA_FOUND
+#cmakedefine ENABLE_JUPYTER
+
+#cmakedefine MATHEMATICA_FOUND
+#define Mathematica_KERNEL_EXECUTABLE "@Mathematica_KERNEL_EXECUTABLE@"
+
+#define Python_VERSION_MAJOR  "@Python_VERSION_MAJOR@"
+#define Python_VERSION_MINOR  "@Python_VERSION_MINOR@"
+
+#cmakedefine USE_MICROTEX
